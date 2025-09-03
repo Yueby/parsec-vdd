@@ -18,19 +18,19 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
-      - name: Sign the build
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-          project-slug: parsec-vdd
-          signing-policy-slug: release-signing
-          artifact-configuration-slug: zipped-exe
-          github-artifact-id: "${{ needs.build.outputs.artifact-id }}"
-          wait-for-completion: true
-          output-artifact-directory: bin
-          parameters: |
-            Version: "${{ github.ref_name }}"
+      # - name: Sign the build
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #     organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+      #     project-slug: parsec-vdd
+      #     signing-policy-slug: release-signing
+      #     artifact-configuration-slug: zipped-exe
+      #     github-artifact-id: "${{ needs.build.outputs.artifact-id }}"
+      #     wait-for-completion: true
+      #     output-artifact-directory: bin
+      #     parameters: |
+      #       Version: "${{ github.ref_name }}"
 
       - name: Fetch distro branch
         uses: actions/checkout@v4
@@ -54,26 +54,31 @@ jobs:
           path: |
             distro/out/*.exe
 
-      - name: Sign the installer
-        uses: signpath/github-action-submit-signing-request@v1
-        with:
-          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-          organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-          project-slug: parsec-vdd
-          signing-policy-slug: release-signing
-          artifact-configuration-slug: zipped-exe
-          github-artifact-id: "${{steps.artifact-upload-installer-step.outputs.artifact-id}}"
-          wait-for-completion: true
-          output-artifact-directory: distro/publish
-          parameters: |
-            Version: "${{ github.ref_name }}"
+      # - name: Sign the installer
+      #   uses: signpath/github-action-submit-signing-request@v1
+      #   with:
+      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+      #     organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
+      #     project-slug: parsec-vdd
+      #     signing-policy-slug: release-signing
+      #     artifact-configuration-slug: zipped-exe
+      #     github-artifact-id: "${{steps.artifact-upload-installer-step.outputs.artifact-id}}"
+      #     wait-for-completion: true
+      #     output-artifact-directory: distro/publish
+      #     parameters: |
+      #       Version: "${{ github.ref_name }}"
+
+      - name: Copy installer to publish directory (skip signing)
+        run: |
+          # Copy installer to publish directory, skip signing step
+          Copy-Item -Path "distro\out\*" -Destination "distro\publish\" -Force
 
       - name: Delete unwanted artifacts
         uses: geekyeggo/delete-artifact@v5
         with:
           name: "*"
 
-      - name: Upload signed output
+      - name: Upload unsigned output
         uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact-name }}
