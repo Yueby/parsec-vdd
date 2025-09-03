@@ -22,21 +22,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact-name }}
-          path: app/bin/
+          path: .
 
-      # - name: Sign the build
-      #   uses: signpath/github-action-submit-signing-request@v1
-      #   with:
-      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-      #     organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-      #     project-slug: parsec-vdd
-      #     signing-policy-slug: release-signing
-      #     artifact-configuration-slug: zipped-exe
-      #     github-artifact-id: "${{ needs.build.outputs.artifact-id }}"
-      #     wait-for-completion: true
-      #     output-artifact-directory: bin
-      #     parameters: |
-      #       Version: "${{ github.ref_name }}"
+      - name: Copy build artifacts (skip signing)
+        run: |
+          # Use unsigned build artifacts directly, skip signing
 
       - name: Fetch distro branch
         uses: actions/checkout@v4
@@ -49,6 +39,9 @@ jobs:
         run: |
           mkdir distro\publish
           Compress-Archive -Path app\bin\* -DestinationPath distro\publish\portable.zip -Force
+          # Copy files to the location expected by setup.iss
+          mkdir bin
+          Copy-Item -Path "app\bin\*" -Destination "bin\" -Recurse -Force
           cd distro
           & "$env:ProgramFiles (x86)\Inno Setup 6\iscc.exe" setup.iss
 
@@ -60,24 +53,10 @@ jobs:
           path: |
             distro/out/*.exe
 
-      # - name: Sign the installer
-      #   uses: signpath/github-action-submit-signing-request@v1
-      #   with:
-      #     api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
-      #     organization-id: ${{ secrets.SIGNPATH_ORG_ID }}
-      #     project-slug: parsec-vdd
-      #     signing-policy-slug: release-signing
-      #     artifact-configuration-slug: zipped-exe
-      #     github-artifact-id: "${{steps.artifact-upload-installer-step.outputs.artifact-id}}"
-      #     wait-for-completion: true
-      #     output-artifact-directory: distro/publish
-      #     parameters: |
-      #       Version: "${{ github.ref_name }}"
-
       - name: Copy installer to publish directory (skip signing)
         run: |
-          # Copy installer to publish directory, skip signing step
-          Copy-Item -Path "distro\out\*" -Destination "distro\publish\" -Force
+          # Skip installer signing, copy directly to publish directory
+          Copy-Item -Path "distro\out\*" -Destination "distro\publish\" -Recurse -Force
 
       - name: Delete unwanted artifacts
         uses: geekyeggo/delete-artifact@v5
@@ -88,4 +67,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact-name }}
-          path: distro/publis
+          path: distro/publish/
