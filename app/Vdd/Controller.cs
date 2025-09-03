@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace ParsecVDisplay.Vdd
 {
@@ -126,6 +127,15 @@ namespace ParsecVDisplay.Vdd
                 {
                     throw new ErrorOperationFailed(ErrorOperationFailed.Operation.AddDisplay);
                 }
+
+                // Refresh display configuration to activate the newly created virtual display
+                // This eliminates the need for users to manually change display settings
+                // Use Task to avoid blocking the main thread
+                Task.Run(async () =>
+                {
+                    await Task.Delay(100); // Small delay to ensure display is ready
+                    Display.RefreshDisplayConfiguration();
+                });
             }
         }
 

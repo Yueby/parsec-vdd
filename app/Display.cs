@@ -233,6 +233,26 @@ namespace ParsecVDisplay
             return list;
         }
 
+        /// <summary>
+        /// Refresh display configuration to activate newly created virtual displays.
+        /// This forces Windows to re-evaluate and activate the display configuration.
+        /// </summary>
+        public static void RefreshDisplayConfiguration()
+        {
+            try
+            {
+                // Force Windows to refresh the entire display configuration
+                // This simulates the manual display settings change that users currently need to do
+                var devMode = new Native.DEVMODE();
+                devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
+                Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
+            }
+            catch
+            {
+                // Ignore errors - this is a best-effort operation
+            }
+        }
+
         public static List<Display> GetAllDisplays()
         {
             var displayMap = new Dictionary<string, Display>(StringComparer.OrdinalIgnoreCase);
