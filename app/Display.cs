@@ -235,39 +235,51 @@ namespace ParsecVDisplay
 
         /// <summary>
         /// Refresh display configuration to activate newly created virtual displays.
-        /// This forces Windows to re-evaluate and activate the display configuration.
+        /// This simulates the user's manual process: select virtual display -> change to "only on virtual display" -> cancel
         /// </summary>
         public static void RefreshDisplayConfiguration()
         {
             try
             {
-                // Try to open Windows display settings to force activation
-                // This simulates the user manually opening display settings
-                Helper.ShellExec("ms-settings:display");
+                // Get all virtual displays
+                var displays = GetAllDisplays();
+                var virtualDisplays = displays.Where(d => d.DisplayName.Contains("ParsecVDA")).ToList();
 
-                // Wait a moment for settings to open
-                System.Threading.Thread.Sleep(1000);
-
-                // Close the settings window
-                var processes = System.Diagnostics.Process.GetProcessesByName("SystemSettings");
-                foreach (var process in processes)
+                if (virtualDisplays.Count > 0)
                 {
-                    try
+                    var virtualDisplay = virtualDisplays[0]; // Use the first virtual display
+
+                    // Simulate the user's manual process:
+                    // 1. Change display mode to "only on virtual display" (this triggers the countdown)
+                    // 2. Then immediately cancel it (this activates the virtual display)
+
+                    var devMode = new Native.DEVMODE();
+                    devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
+
+                    if (Native.EnumDisplaySettings(virtualDisplay.DeviceName, -1, ref devMode))
                     {
-                        process.CloseMainWindow();
+                        // First, try to change to "only on virtual display" mode
+                        // This should trigger the same countdown dialog as manual operation
+                        int result = Native.ChangeDisplaySettingsEx(virtualDisplay.DeviceName, ref devMode,
+                            IntPtr.Zero, /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
+
+                        // If the change was successful (or would be successful), immediately revert
+                        if (result == 0 || result == 1) // 0 = success, 1 = restart required
+                        {
+                            // Revert the change immediately (simulate clicking "Restore")
+                            Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
+                        }
                     }
-                    catch { }
                 }
             }
             catch
             {
-                // Fallback to the original method if opening settings fails
+                // Fallback to simple refresh if the above fails
                 try
                 {
                     var devMode = new Native.DEVMODE();
                     devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
-                    Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero,
-                        /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
+                    Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
                 }
                 catch { }
             }

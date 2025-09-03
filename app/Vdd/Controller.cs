@@ -46,7 +46,7 @@ namespace ParsecVDisplay.Vdd
                 if (cancellation.IsCancellationRequested)
                     break;
 
-                if (VddHandle.IsValidHandle() && LastStatus == Device.Status.OK)    
+                if (VddHandle.IsValidHandle() && LastStatus == Device.Status.OK)
                     Core.Update(VddHandle);
 
                 Thread.Sleep(100);
@@ -133,7 +133,7 @@ namespace ParsecVDisplay.Vdd
                 // Use Task to avoid blocking the main thread
                 Task.Run(async () =>
                 {
-                    await Task.Delay(3000); // Small delay to ensure display is ready
+                    await Task.Delay(4000); // Small delay to ensure display is ready
                     Display.RefreshDisplayConfiguration();
                 });
             }
