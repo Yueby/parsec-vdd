@@ -199,16 +199,22 @@ namespace ParsecVDisplay
 
         void RestoreDisplays()
         {
-            //var savedCount = Config.DisplayCount;
+            var savedCount = Config.DisplayCount;
+            if (savedCount > 0)
+            {
+                try
+                {
+                    var displays = Vdd.Core.GetDisplays();
+                    var amount = savedCount - displays.Count;
 
-            //if (savedCount > 0)
-            //{
-            //    var displays = Vdd.Core.GetDisplays();
-            //    var amount = savedCount - displays.Count;
-
-            //    for (int i = 0; i < amount; i++)
-            //        Controller.AddDisplay(out var _);
-            //}
+                    for (int i = 0; i < amount; i++)
+                        Vdd.Controller.AddDisplay();
+                }
+                catch (Exception ex)
+                {
+                    HandleVddError(ex);
+                }
+            }
         }
 
         public void AddDisplay(object sender, EventArgs e)

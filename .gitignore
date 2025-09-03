@@ -614,3 +614,4 @@ FodyWeavers.xsd
 #########################
 
 *.zip
+/.idea
