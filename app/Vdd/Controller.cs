@@ -133,7 +133,7 @@ namespace ParsecVDisplay.Vdd
                 // Use Task to avoid blocking the main thread
                 Task.Run(async () =>
                 {
-                    await Task.Delay(100); // Small delay to ensure display is ready
+                    await Task.Delay(3000); // Small delay to ensure display is ready
                     Display.RefreshDisplayConfiguration();
                 });
             }
