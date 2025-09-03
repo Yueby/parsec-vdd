@@ -50,7 +50,7 @@ namespace ParsecVDisplay
 
         public static bool AutoOpenDisplaySettings
         {
-            get => GetInt(nameof(AutoOpenDisplaySettings)) != 0;
+            get => GetInt(nameof(AutoOpenDisplaySettings), 1) != 0;
             set => SetInt(nameof(AutoOpenDisplaySettings), value ? 1 : 0);
         }
 
