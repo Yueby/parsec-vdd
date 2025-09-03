@@ -48,6 +48,12 @@ namespace ParsecVDisplay
             set => SetInt(nameof(SkipDriverCheck), value ? 1 : 0);
         }
 
+        public static bool AutoOpenDisplaySettings
+        {
+            get => GetInt(nameof(AutoOpenDisplaySettings)) != 0;
+            set => SetInt(nameof(AutoOpenDisplaySettings), value ? 1 : 0);
+        }
+
         public static int MirroringFPS
         {
             get => GetInt(nameof(MirroringFPS), 30);

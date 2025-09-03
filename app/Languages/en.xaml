@@ -31,6 +31,7 @@
     <system:String x:Key="t_restore_displays">Restore displays</system:String>
     <system:String x:Key="t_fallback_display">Fallback display</system:String>
     <system:String x:Key="t_keep_screen_on">Keep screen on</system:String>
+    <system:String x:Key="t_auto_open_display_settings">Auto open display settings</system:String>
     <system:String x:Key="t_check_for_update">Check for update</system:String>
     <system:String x:Key="t_exit">Exit</system:String>
     

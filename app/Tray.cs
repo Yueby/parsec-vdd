@@ -21,6 +21,7 @@ namespace ParsecVDisplay
         ToolStripMenuItem MI_RestoreDisplays;
         ToolStripMenuItem MI_FallbackDisplay;
         ToolStripMenuItem MI_KeepScreenOn;
+        ToolStripMenuItem MI_AutoOpenDisplaySettings;
 
         //  ParsecVDisplay v{version}
         //  ______________
@@ -80,6 +81,8 @@ namespace ParsecVDisplay
                                     null, OptionsCheck) { CheckOnClick = true, Checked = Config.FallbackDisplay }),
                                 (MI_KeepScreenOn = new ToolStripMenuItem("t_keep_screen_on",
                                     null, OptionsCheck) { CheckOnClick = true, Checked = Config.KeepScreenOn }),
+                                (MI_AutoOpenDisplaySettings = new ToolStripMenuItem("t_auto_open_display_settings",
+                                    null, OptionsCheck) { CheckOnClick = true, Checked = Config.AutoOpenDisplaySettings }),
                             }
                         },
                         (MI_Language = new ToolStripMenuItem("t_language", translateIcon)),
@@ -313,6 +316,8 @@ namespace ParsecVDisplay
                 Config.FallbackDisplay = MI_FallbackDisplay.Checked;
             else if (sender == MI_KeepScreenOn)
                 Config.KeepScreenOn = MI_KeepScreenOn.Checked;
+            else if (sender == MI_AutoOpenDisplaySettings)
+                Config.AutoOpenDisplaySettings = MI_AutoOpenDisplaySettings.Checked;
         }
 
         void SaveDisplayCount(object sender, EventArgs e)

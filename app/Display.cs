@@ -233,58 +233,6 @@ namespace ParsecVDisplay
             return list;
         }
 
-        /// <summary>
-        /// Refresh display configuration to activate newly created virtual displays.
-        /// This simulates the user's manual process: select virtual display -> change to "only on virtual display" -> cancel
-        /// </summary>
-        public static void RefreshDisplayConfiguration()
-        {
-            try
-            {
-                // Get all virtual displays
-                var displays = GetAllDisplays();
-                var virtualDisplays = displays.Where(d => d.DisplayName.Contains("ParsecVDA")).ToList();
-
-                if (virtualDisplays.Count > 0)
-                {
-                    var virtualDisplay = virtualDisplays[0]; // Use the first virtual display
-
-                    // Simulate the user's manual process:
-                    // 1. Change display mode to "only on virtual display" (this triggers the countdown)
-                    // 2. Then immediately cancel it (this activates the virtual display)
-
-                    var devMode = new Native.DEVMODE();
-                    devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
-
-                    if (Native.EnumDisplaySettings(virtualDisplay.DeviceName, -1, ref devMode))
-                    {
-                        // First, try to change to "only on virtual display" mode
-                        // This should trigger the same countdown dialog as manual operation
-                        int result = Native.ChangeDisplaySettingsEx(virtualDisplay.DeviceName, ref devMode,
-                            IntPtr.Zero, /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
-
-                        // If the change was successful (or would be successful), immediately revert
-                        if (result == 0 || result == 1) // 0 = success, 1 = restart required
-                        {
-                            // Revert the change immediately (simulate clicking "Restore")
-                            Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // Fallback to simple refresh if the above fails
-                try
-                {
-                    var devMode = new Native.DEVMODE();
-                    devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
-                    Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
-                }
-                catch { }
-            }
-        }
-
         public static List<Display> GetAllDisplays()
         {
             var displayMap = new Dictionary<string, Display>(StringComparer.OrdinalIgnoreCase);
@@ -438,12 +386,6 @@ namespace ParsecVDisplay
             [DllImport("user32.dll")]
             public static extern int ChangeDisplaySettingsEx(string lpszDeviceName, ref DEVMODE lpDevMode,
                 IntPtr hwnd, uint dwflags, IntPtr lParam);
-
-            [DllImport("user32.dll")]
-            public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
-
-            public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xFFFF);
-            public const uint WM_DISPLAYCHANGE = 0x007E;
 
             [StructLayout(LayoutKind.Sequential)]
             public struct DEVMODE

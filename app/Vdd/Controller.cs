@@ -128,14 +128,15 @@ namespace ParsecVDisplay.Vdd
                     throw new ErrorOperationFailed(ErrorOperationFailed.Operation.AddDisplay);
                 }
 
-                // Refresh display configuration to activate the newly created virtual display
-                // This eliminates the need for users to manually change display settings
-                // Use Task to avoid blocking the main thread
-                Task.Run(async () =>
+                // Auto open display settings if enabled
+                if (Config.AutoOpenDisplaySettings)
                 {
-                    await Task.Delay(4000); // Small delay to ensure display is ready
-                    Display.RefreshDisplayConfiguration();
-                });
+                    Task.Run(async () =>
+                    {
+                        await Task.Delay(1000); // Wait for display to be created
+                        Helper.ShellExec("ms-settings:display");
+                    });
+                }
             }
         }
 
