@@ -37,11 +37,28 @@ jobs:
 
       - name: Make setup installer & portable app
         run: |
+          # Debug: List directory structure
+          Write-Host "Current directory contents:"
+          Get-ChildItem -Recurse | Format-Table Name, FullName
+          
           mkdir distro\publish
-          Compress-Archive -Path app\bin\* -DestinationPath distro\publish\portable.zip -Force
+          
+          # Find the correct path for build artifacts
+          if (Test-Path "app\bin\*") {
+            $sourcePath = "app\bin\*"
+          } elseif (Test-Path "bin\*") {
+            $sourcePath = "bin\*"
+          } else {
+            Write-Host "Build artifacts not found in expected locations"
+            exit 1
+          }
+          
+          Write-Host "Using source path: $sourcePath"
+          Compress-Archive -Path $sourcePath -DestinationPath distro\publish\portable.zip -Force
+          
           # Copy files to the location expected by setup.iss
           mkdir bin
-          Copy-Item -Path "app\bin\*" -Destination "bin\" -Recurse -Force
+          Copy-Item -Path $sourcePath -Destination "bin\" -Recurse -Force
           cd distro
           & "$env:ProgramFiles (x86)\Inno Setup 6\iscc.exe" setup.iss
 
