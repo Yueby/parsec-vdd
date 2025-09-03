@@ -242,10 +242,20 @@ namespace ParsecVDisplay
             try
             {
                 // Force Windows to refresh the entire display configuration
-                // This simulates the manual display settings change that users currently need to do
+                // Use CDS_UPDATEREGISTRY to update the registry and CDS_GLOBAL to apply globally
                 var devMode = new Native.DEVMODE();
                 devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
+
+                // Try multiple approaches to ensure display refresh
+                // 1. Refresh all displays with registry update
+                Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero,
+                    /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
+
+                // 2. Also try refreshing without registry update
                 Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
+
+                // 3. Send WM_DISPLAYCHANGE message to notify all windows
+                Native.SendMessage(Native.HWND_BROADCAST, Native.WM_DISPLAYCHANGE, IntPtr.Zero, IntPtr.Zero);
             }
             catch
             {
@@ -406,6 +416,12 @@ namespace ParsecVDisplay
             [DllImport("user32.dll")]
             public static extern int ChangeDisplaySettingsEx(string lpszDeviceName, ref DEVMODE lpDevMode,
                 IntPtr hwnd, uint dwflags, IntPtr lParam);
+
+            [DllImport("user32.dll")]
+            public static extern IntPtr SendMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+            public static readonly IntPtr HWND_BROADCAST = new IntPtr(0xFFFF);
+            public const uint WM_DISPLAYCHANGE = 0x007E;
 
             [StructLayout(LayoutKind.Sequential)]
             public struct DEVMODE
