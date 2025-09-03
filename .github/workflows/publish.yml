@@ -48,6 +48,8 @@ jobs:
             $sourcePath = "app\bin\*"
           } elseif (Test-Path "bin\*") {
             $sourcePath = "bin\*"
+          } elseif (Test-Path "ParsecVDisplay.exe") {
+            $sourcePath = "ParsecVDisplay.exe", "ParsecVDisplay.exe.config", "vdd.cmd", "version"
           } else {
             Write-Host "Build artifacts not found in expected locations"
             exit 1
