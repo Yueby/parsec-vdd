@@ -151,7 +151,7 @@ namespace ParsecVDisplay
         {
             var mode = new Native.DEVMODE();
             mode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
-            
+
             if (Native.EnumDisplaySettings(DeviceName, -1, ref mode))
             {
                 if (width.HasValue)
@@ -241,25 +241,35 @@ namespace ParsecVDisplay
         {
             try
             {
-                // Force Windows to refresh the entire display configuration
-                // Use CDS_UPDATEREGISTRY to update the registry and CDS_GLOBAL to apply globally
-                var devMode = new Native.DEVMODE();
-                devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
+                // Try to open Windows display settings to force activation
+                // This simulates the user manually opening display settings
+                Helper.ShellExec("ms-settings:display");
 
-                // Try multiple approaches to ensure display refresh
-                // 1. Refresh all displays with registry update
-                Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero,
-                    /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
+                // Wait a moment for settings to open
+                System.Threading.Thread.Sleep(1000);
 
-                // 2. Also try refreshing without registry update
-                Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero, 0, IntPtr.Zero);
-
-                // 3. Send WM_DISPLAYCHANGE message to notify all windows
-                Native.SendMessage(Native.HWND_BROADCAST, Native.WM_DISPLAYCHANGE, IntPtr.Zero, IntPtr.Zero);
+                // Close the settings window
+                var processes = System.Diagnostics.Process.GetProcessesByName("SystemSettings");
+                foreach (var process in processes)
+                {
+                    try
+                    {
+                        process.CloseMainWindow();
+                    }
+                    catch { }
+                }
             }
             catch
             {
-                // Ignore errors - this is a best-effort operation
+                // Fallback to the original method if opening settings fails
+                try
+                {
+                    var devMode = new Native.DEVMODE();
+                    devMode.dmSize = (short)Marshal.SizeOf(typeof(Native.DEVMODE));
+                    Native.ChangeDisplaySettingsEx(null, ref devMode, IntPtr.Zero,
+                        /*CDS_UPDATEREGISTRY*/ 0x1 | /*CDS_GLOBAL*/ 0x8, IntPtr.Zero);
+                }
+                catch { }
             }
         }
 
