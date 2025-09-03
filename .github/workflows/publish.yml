@@ -18,6 +18,12 @@ jobs:
           ref: ${{ github.ref }}
           fetch-depth: 0
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build.outputs.artifact-name }}
+          path: app/bin/
+
       # - name: Sign the build
       #   uses: signpath/github-action-submit-signing-request@v1
       #   with:
