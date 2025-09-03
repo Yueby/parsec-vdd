@@ -42,7 +42,7 @@ jobs:
       - name: Make setup installer & portable app
         run: |
           mkdir distro\publish
-          Compress-Archive -Path bin\* -DestinationPath distro\publish\portable.zip -Force
+          Compress-Archive -Path app\bin\* -DestinationPath distro\publish\portable.zip -Force
           cd distro
           & "$env:ProgramFiles (x86)\Inno Setup 6\iscc.exe" setup.iss
 
@@ -82,4 +82,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ needs.build.outputs.artifact-name }}
-          path: distro/publish/
+          path: distro/publis
